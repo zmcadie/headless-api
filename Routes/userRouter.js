@@ -14,8 +14,36 @@ userRouter.route('/')
       }
       user.password = hash
       user.save((e, product) => {
+        if (product) {
+          const { _id, username, email } = product
+          req.session.user = { _id, username, email }
+        }
         res.status(e ? 400 : 201)
-        .send(product ? { _id: product._id, username: product.username, email: product.email } : e)
+        .send(e ? e : "")
+      })
+    })
+  })
+  .get((req, res) => {
+    let user = req.session.user
+    if (user) {
+      User.findById(user._id, (e, r) => {
+        const { _id, username, email } = r
+        res.status(r ? 200 : 400).send(e ? e : r ? { _id, username, email } : "whoops, something went wrong")
+      })
+    } else {
+      res.status(400).send("no user")
+    }
+  })
+  .delete((req, res) => {
+    User.findOne({ username: req.body.username }, (err, user) => {
+      bcrypt.compare(req.body.password, user.password, (e, r) => {
+        if (r) {
+          user.remove((e, p) => {
+            res.status(e ? 400 : 200).send(e ? "error deleting user" : "user deleted")
+          })
+        } else {
+          res.status(400).send("could not delete user")
+        }
       })
     })
   })

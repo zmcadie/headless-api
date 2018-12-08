@@ -5,6 +5,7 @@ import userRouter from './Routes/userRouter'
 import mongoose from 'mongoose'
 import bodyParser from 'body-parser'
 import cors from 'cors'
+import session from 'express-session'
 
 require('dotenv').config()
 
@@ -13,6 +14,12 @@ const app = express()
 const port = process.env.PORT || 5656
 
 app.use(cors())
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: true,
+  saveUninitialized: false
+}))
 
 app.listen(port, () => {
     console.log(`http://localhost:${port}`)
