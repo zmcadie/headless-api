@@ -50,10 +50,35 @@ userRouter.route('/')
 userRouter.route('/login')
   .post((req, res) => {
     User.findOne({ username: req.body.username }, (err, user) => {
-      bcrypt.compare(req.body.password, user.password, (e, r) => {
-        res.status(r ? 200 : 403).send(e ? e : r)
-      })
+      if (user) {
+        bcrypt.compare(req.body.password, user.password, (e, r) => {
+          const { _id, username, email } = user
+          if (r) {
+            req.session.user = { _id, username, email }
+            res.status(200).send(r)
+          } else {
+            res.status(403).send(e ? e : false)
+          }
+        })
+      } else {
+        res.status(400).send(err ? err : false)
+      }
     })
+  })
+userRouter.route('/logout')
+  .get((req, res) => {
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) {
+          res.status(400).send(err)
+        } else {
+          res.clearCookie('connect.sid')
+          res.status(200).send()
+        }
+      })
+    } else {
+      res.status(200).send()
+    }
   })
 
 export default userRouter
