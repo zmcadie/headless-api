@@ -14,7 +14,6 @@ const app = express()
 const port = process.env.PORT || 5656
 
 app.use(cors())
-
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
@@ -22,7 +21,7 @@ app.use(session({
 }))
 
 app.listen(port, () => {
-    console.log(`http://localhost:${port}`)
+  console.log(`http://localhost:${port}`)
 })
 
 app.get('/', (req, res) => res.json({content: "root"}))

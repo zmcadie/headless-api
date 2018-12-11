@@ -55,7 +55,7 @@ userRouter.route('/login')
           const { _id, username, email } = user
           if (r) {
             req.session.user = { _id, username, email }
-            res.status(200).send(r)
+            res.status(200).send(JSON.stringify({ _id, username, email }))
           } else {
             res.status(403).send(e ? e : false)
           }
