@@ -17,9 +17,10 @@ userRouter.route('/')
         if (product) {
           const { _id, username, email } = product
           req.session.user = { _id, username, email }
+          res.status(201).send({ _id, username, email })
+        } else {
+          res.status(400).send(e ? e : "")
         }
-        res.status(e ? 400 : 201)
-        .send(e ? e : "")
       })
     })
   })
