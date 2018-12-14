@@ -58,11 +58,11 @@ userRouter.route('/login')
             req.session.user = { _id, username, email }
             res.status(200).send(JSON.stringify({ _id, username, email }))
           } else {
-            res.status(403).send(e ? e : false)
+            res.status(403).send(e ? e : "not authorized")
           }
         })
       } else {
-        res.status(400).send(err ? err : false)
+        res.status(400).send(err ? err : "no user")
       }
     })
   })
@@ -79,6 +79,30 @@ userRouter.route('/logout')
       })
     } else {
       res.status(200).send()
+    }
+  })
+userRouter.route('/:id')
+  .put((req, res) => {
+    if (req.session.user) {
+      const id = req.session.user._id
+      if (req.session.user._id === req.params.id) {
+        delete req.body.password
+        User.findByIdAndUpdate(id, req.body, { new: true, runValidators: true }, (err, user) => {
+          if (err) {
+            res.status(400).send(err)
+          } else if (user) {
+            const { _id, username, email } = user
+            req.session.user = { _id, username, email }
+            res.status(200).send({ _id, username, email })
+          } else {
+            res.status(400).send("No user found")
+          }
+        })
+      } else {
+        res.status(400).send("Not authorized to update user")
+      }
+    } else {
+      res.status(400).send("User not logged in")
     }
   })
 
