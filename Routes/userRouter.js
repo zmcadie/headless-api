@@ -81,11 +81,54 @@ userRouter.route('/logout')
       res.status(200).send()
     }
   })
+userRouter.route('/password/:id')
+  .put((req, res) => {
+    if (req.session.user) {
+      const id = req.session.user._id
+      if (id === req.params.id) {
+        const { oldPass, newPass } = req.body
+        User.findById(id, (err, user) => {
+          if (err) {
+            res.status(400).send(err)
+          } else if (user) {
+            bcrypt.compare(oldPass, user.password, (e, r) => {
+              if (r) {
+                bcrypt.hash(newPass, 10, (err, hash) => {
+                  if (err) {
+                    res.status(500).send(err)
+                    return
+                  }
+                  user.password = hash
+                  user.save((e, product) => {
+                    if (product) {
+                      const { _id, username, email } = product
+                      req.session.user = { _id, username, email }
+                      res.status(201).send({ _id, username, email })
+                    } else {
+                      res.status(400).send(e ? e : "User save failed")
+                    }
+                  })
+                })
+              } else {
+                res.status(403).send(e ? e : "not authorized")
+              }
+            })
+          } else {
+            res.status(400).send("No user found")
+          }
+        })
+      } else {
+        res.status(400).send("Not authorized to update user")
+      }
+    } else {
+      res.status(400).send("User not logged in")
+    }
+  })
 userRouter.route('/:id')
   .put((req, res) => {
     if (req.session.user) {
       const id = req.session.user._id
-      if (req.session.user._id === req.params.id) {
+      if (id === req.params.id) {
         delete req.body.password
         User.findByIdAndUpdate(id, req.body, { new: true, runValidators: true }, (err, user) => {
           if (err) {
