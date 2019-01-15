@@ -9,14 +9,14 @@ import session from 'express-session'
 
 require('dotenv').config()
 
-const db = mongoose.connect(process.env.DB_URL);
+const db = mongoose.connect(process.env.DB_URL_LOCAL);
 const app = express()
 const port = process.env.PORT || 5656
 
-app.use(cors())
+app.use(cors({origin: true, credentials: true}))
 app.use(session({
   secret: process.env.SESSION_SECRET,
-  resave: true,
+  resave: false,
   saveUninitialized: false
 }))
 

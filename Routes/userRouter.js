@@ -56,7 +56,7 @@ userRouter.route('/login')
           const { _id, username, email } = user
           if (r) {
             req.session.user = { _id, username, email }
-            res.status(200).send(JSON.stringify({ _id, username, email }))
+            res.status(200).send(req.session.user)
           } else {
             res.status(403).send(e ? e : "not authorized")
           }
